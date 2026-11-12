@@ -1,0 +1,15 @@
+{
+  "name": "Auto-entrepreneur Maroc",
+  "short_name": "AutoEntrepreneur",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#54565a",
+  "theme_color": "#212529",
+  "icons": [
+    {
+      "src": "icon2025.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
