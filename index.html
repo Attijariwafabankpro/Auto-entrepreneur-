@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto-entrepreneur - Portail & Déclarations</title>
+  
+  <!-- Liaison avec le Manifest pour l'installation PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#212529">
+  <link rel="apple-touch-icon" href="icon2025.png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: #54565a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background-color: #212529;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .brand-logo {
+      background-color: #cfd2d6;
+      padding: 6px 12px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 44px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      color: #495057;
+      line-height: 1.15;
+    }
+
+    .logo-ar { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+    .logo-amz { font-size: 10px; font-weight: 600; letter-spacing: 1px; }
+    .logo-fr { font-size: 12px; font-weight: 700; color: #343a40; }
+
+    .menu-toggle {
+      background: transparent;
+      border: 1px solid #495057;
+      border-radius: 5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background-color: #868e96;
+    }
+
+    .nav-user-actions {
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-buttons-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-nav-tab {
+      background-color: #343a40;
+      color: #ffffff;
+      border: 1px solid #495057;
+      padding: 7px 14px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-nav-tab:hover, .btn-nav-tab.active {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+
+    .btn-logout {
+      background-color: #dc3545;
+      color: #ffffff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-logout:hover { background-color: #bb2d3b; }
+
+    .mobile-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      background-color: #212529;
+      flex-direction: column;
+      padding: 15px 20px;
+      border-top: 1px solid #343a40;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+      z-index: 1100;
+      gap: 10px;
+    }
+
+    .mobile-dropdown.show { display: flex; }
+    .mobile-dropdown button { width: 100%; text-align: left; padding: 10px 14px; }
+
+    #loginView {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 15px;
+    }
+
+    .login-card {
+      background-color: #1e2631;
+      width: 100%;
+      max-width: 460px;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-body { padding: 32px 28px 28px; }
+    .card-title { font-size: 32px; font-weight: 300; color: #f8f9fa; margin-bottom: 24px; }
+
+    .input-group {
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 18px;
+      border: 1px solid #495057;
+      border-radius: 5px;
+      background-color: #2b3035;
+      overflow: hidden;
+    }
+
+    .input-group:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+
+    .input-icon {
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #2b3035;
+      border-right: 1px solid #495057;
+      color: #ffffff;
+    }
+
+    .input-icon svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .login-control {
+      flex: 1;
+      background-color: #2b3035;
+      border: none;
+      padding: 12px 14px;
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .login-control::placeholder { color: #adb5bd; }
+
+    .captcha-label { font-size: 16px; color: #e9ecef; margin-top: 22px; margin-bottom: 12px; }
+
+    .captcha-display-box {
+      display: flex;
+      align-items: center;
+      background-color: #2b3035;
+      border-radius: 4px;
+      height: 56px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    #captchaCanvas { display: block; height: 56px; width: 165px; background-color: #d8dce3; }
+
+    .single-input {
+      width: 100%;
+      background-color: #2b3035;
+      border: 1px solid #495057;
+      border-radius: 5px;
+      padding: 12px 14px;
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .single-input::placeholder { color: #adb5bd; }
+
+    .refresh-link {
+      display: inline-block;
+      color: #3897f0;
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 24px;
+      margin-left: 12px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: #0d6efd;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit svg { width: 18px; height: 18px; fill: currentColor; }
+
+    .card-footer {
+      background-color: #182029;
+      border-top: 1px solid #2c3540;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .footer-btn {
+      flex: 1;
+      background-color: #0b0c0e;
+      border: 1px solid #343a40;
+      border-radius: 5px;
+      color: #f8f9fa;
+      padding: 10px;
+      font-size: 14px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .alert-msg { margin-top: 14px; padding: 10px; border-radius: 4px; font-size: 14px; display: none; text-align: center; }
+    .alert-error { background-color: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #ff8591; }
+
+    .app-section {
+      display: none;
+      flex: 1;
+      background-color: #f0f2f5;
+      color: #333333;
+      padding: 35px 20px;
+    }
+
+    .dashboard-container { max-width: 960px; margin: 0 auto; }
+
+    .welcome-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 25px 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .welcome-card h1 { font-size: 22px; color: #1e2631; margin-bottom: 6px; }
+    .welcome-card p { color: #6c757d; font-size: 14px; }
+    .status-pill { background-color: #d1e7dd; color: #0f5132; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+    .card-box {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      margin-bottom: 25px;
+    }
+
+    .card-box h2 { font-size: 19px; color: #1e2631; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #f1f3f5; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #495057; font-size: 15px; }
+
+    .dash-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 15px;
+      background-color: #ffffff;
+      color: #212529;
+      outline: none;
+    }
+
+    .summary-box { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 20px; margin: 25px 0; }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; color: #495057; }
+    .summary-row:last-child { padding-top: 12px; border-top: 1px dashed #ced4da; font-weight: 700; font-size: 18px; color: #0d6efd; }
+
+    .btn-submit-dec { background-color: #198754; color: #ffffff; border: none; width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 5px; cursor: pointer; }
+    .btn-transfer { background-color: #0d6efd; color: #ffffff; border: none; padding: 10px 18px; font-size: 14px; font-weight: 600; border-radius: 5px; cursor: pointer; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 25px; }
+    .kpi-card { background: #ffffff; border-radius: 8px; padding: 18px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-left: 4px solid #0d6efd; }
+    .kpi-card.web { border-left-color: #0d6efd; }
+    .kpi-card.memdev { border-left-color: #6610f2; }
+    .kpi-card.smmcpan { border-left-color: #fd7e14; }
+    .kpi-card.ecole { border-left-color: #198754; }
+    .kpi-card.total { border-left-color: #212529; background-color: #1e2631; color: #ffffff; }
+
+    .kpi-title { font-size: 12px; text-transform: uppercase; font-weight: 600; color: #6c757d; margin-bottom: 8px; }
+    .kpi-card.total .kpi-title { color: #adb5bd; }
+    .kpi-amount { font-size: 20px; font-weight: 700; color: #212529; }
+    .kpi-card.total .kpi-amount { color: #ffffff; }
+    .kpi-sub { font-size: 12px; color: #6c757d; margin-top: 4px; }
+
+    .badge-source { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-web { background-color: #cfe2ff; color: #084298; }
+    .badge-memdev { background-color: #e0cffc; color: #3d0a91; }
+    .badge-smmcpan { background-color: #ffe5d0; color: #984c0c; }
+    .badge-ecole { background-color: #d1e7dd; color: #0f5132; }
+
+    .btn-delete-row { background-color: transparent; border: 1px solid #dc3545; color: #dc3545; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .btn-delete-row:hover { background-color: #dc3545; color: #ffffff; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .info-group { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; }
+    .info-group label { font-size: 12px; font-weight: 600; color: #6c757d; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .info-value { font-size: 16px; font-weight: 500; color: #212529; }
+    .section-subtitle { font-size: 16px; color: #0d6efd; margin: 20px 0 12px 0; font-weight: 600; }
+
+    .table-responsive { overflow-x: auto; }
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    .history-table th, .history-table td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; }
+    .history-table th { background-color: #f8f9fa; color: #495057; font-weight: 600; }
+
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+    .modal-content { background: #ffffff; color: #212529; padding: 30px; border-radius: 8px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .modal-content h3 { color: #198754; margin-bottom: 12px; font-size: 20px; }
+    .modal-content p { color: #6c757d; margin-bottom: 20px; line-height: 1.5; }
+    .modal-btn { background-color: #0d6efd; color: #ffffff; border: none; padding: 10px 24px; border-radius: 5px; font-size: 15px; cursor: pointer; }
+
+    @media (max-width: 820px) {
+      .nav-user-actions { display: none !important; }
+      .menu-toggle { display: flex !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="#" class="brand-logo">
+      <svg class="logo-icon" viewBox="0 0 60 55" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8,18 C14,8 28,4 42,6 C28,9 18,14 14,22 Z" fill="#0072ce"/>
+        <path d="M6,26 C12,15 28,10 46,13 C30,16 19,22 14,30 Z" fill="#d9272e"/>
+        <path d="M8,35 C15,24 30,19 48,22 C33,25 21,31 16,38 Z" fill="#f39200"/>
+        <path d="M13,43 C20,33 34,29 50,31 C36,34 25,39 20,46 Z" fill="#e6c200"/>
+        <path d="M21,49 C28,41 39,38 52,39 C40,42 31,46 27,51 Z" fill="#3fa535"/>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-ar">المقاول الذاتي</span>
+        <span class="logo-amz">ⴰⵎⵙⵏⴼⵍⵓⵍ ⴰⵏⵉⵎⴰⵏ</span>
+        <span class="logo-fr">Auto-entrepreneur</span>
+      </div>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="mobile-dropdown" id="mobileDropdown">
+      <button class="btn-nav-tab active" id="mTabDeclarations">Déclarations</button>
+      <button class="btn-nav-tab" id="mTabRevenus">Revenus</button>
+      <button class="btn-nav-tab" id="mTabInfos">Informations du Dossier</button>
+      <button class="btn-logout" id="mLogoutBtn">Déconnexion</button>
+    </div>
+
+    <div class="nav-user-actions" id="navUserActions">
+      <div class="nav-buttons-group">
+        <button class="btn-nav-tab active" id="navTabDeclarations">Déclarations</button>
+        <button class="btn-nav-tab" id="navTabRevenus">Revenus</button>
+        <button class="btn-nav-tab" id="navTabInfos">Informations du Dossier</button>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Déconnexion</button>
+    </div>
+  </header>
+
+  <main id="loginView">
+    <div class="login-card">
+      <div class="card-body">
+        <h1 class="card-title">Connexion</h1>
+        <form id="loginForm" novalidate>
+          <div class="input-group">
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            </div>
+            <input type="text" id="cin" class="login-control" placeholder="Numéro de pièce d'identité" required />
+          </div>
+
+          <div class="input-group">
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            </div>
+            <input type="password" id="password" class="login-control" placeholder="Mot de passe" required />
+          </div>
+
+          <p class="captcha-label">Prière de renseigner le résultat de l'opération</p>
+          <div class="captcha-display-box"><canvas id="captchaCanvas" width="165" height="56"></canvas></div>
+          <input type="text" id="captchaInput" class="single-input" placeholder="Code de vérification" required />
+          <a class="refresh-link" id="refreshCaptcha">Nouveau calcul</a>
+
+          <button type="submit" class="btn-submit">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            Connexion
+          </button>
+          <div id="alertBox" class="alert-msg"></div>
+        </form>
+      </div>
+
+      <div class="card-footer">
+        <a href="#" class="footer-btn">Je m'inscris au service.</a>
+        <a href="#" class="footer-btn">Mot de passe oublié ?</a>
+      </div>
+    </div>
+  </main>
+
+  <section id="declarationsView" class="app-section">
+    <div class="dashboard-container">
+      <div class="welcome-card">
+        <div>
+          <h1>Espace de Déclaration du Chiffre d'Affaires</h1>
+          <p>Dossier N° <strong>AE-260723-042047</strong> | CIN : <strong>IC101141</strong>[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span)[span_2](start_span)[span_2](end_span)</p>
+        </div>
+        <span class="status-pill">Compte Actif</span>
+      </div>
+
+      <div class="card-box">
+        <h2>Nouvelle Déclaration</h2>
+        <form id="declarationForm">
+          <div class="form-group">
+            <label for="period">Période de déclaration (Trimestre)</label>
+            <select id="period" class="dash-control" required>
+              <option value="">-- Sélectionnez la période --</option>
+              <option value="T1 - 2026">1er Trimestre 2026 (Janvier - Mars)</option>
+              <option value="T2 - 2026">2ème Trimestre 2026 (Avril - Juin)</option>
+              <option value="T3 - 2026">3ème Trimestre 2026 (Juillet - Septembre)</option>
+              <option value="T4 - 2026">4ème Trimestre 2026 (Octobre - Décembre)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="activityType">Nature de l'activité</label>
+            <select id="activityType" class="dash-control" required>
+              <option value="commercial">Activités Commerciales, Industrielles et Artisanales (0,5 %)</option>
+              <option value="service" selected>Prestations de Services (1 %)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="turnover">Chiffre d'Affaires encaissé (en DH)</label>
+            <input type="number" id="turnover" class="dash-control" placeholder="Ex : 35000" min="0" step="0.01" required />
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-row"><span>Chiffre d'affaires déclaré :</span><span id="displayCA">0,00 DH</span></div>
+            <div class="summary-row"><span>Taux d'imposition applicable :</span><span id="displayRate">1 %</span></div>
+            <div class="summary-row"><span>Montant de l'impôt dû :</span><span id="displayTax">0,00 DH</span></div>
+          </div>
+
+          <button type="submit" class="btn-submit-dec">Valider et Soumettre la Déclaration</button>
+        </form>
+      </div>
+
+      <div class="card-box">
+        <h2>Historique des Déclarations</h2>
+        <div class="table-responsive">
+          <table class="history-table">
+            <thead>
+              <tr><th>Période</th><th>Activité</th><th>Chiffre d'Affaires</th><th>Impôt dû</th><th>Statut</th></tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="5" style="text-align: center; color: #6c757d;">Aucune déclaration enregistrée pour cette session.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="revenusView" class="app-section">
+    <div class="dashboard-container">
+      <div class="welcome-card">
+        <div>
+          <h1>Suivi des Revenus & Encaissements</h1>
+          <p>Centralisez vos revenus par activité pour calculer automatiquement votre chiffre d'affaires</p>
+        </div>
+        <button class="btn-transfer" id="btnTransferToDecl">Reporter le total vers la Déclaration &rarr;</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card web"><div class="kpi-title">WEB</div><div class="kpi-amount" id="kpiWeb">0,00 DH</div><div class="kpi-sub">Création & Développement Web</div></div>
+        <div class="kpi-card memdev"><div class="kpi-title">Contrat DI MEMDEV</div><div class="kpi-amount" id="kpiMemdev">0,00 DH</div><div class="kpi-sub">Salaire mensuel</div></div>
+        <div class="kpi-card smmcpan"><div class="kpi-title">SMMCPAN</div><div class="kpi-amount" id="kpiSmmcpan">0,00 DH</div><div class="kpi-sub">Achat & vente produit digital</div></div>
+        <div class="kpi-card ecole"><div class="kpi-title">École Les Champs Élysées</div><div class="kpi-amount" id="kpiEcole">0,00 DH</div><div class="kpi-sub">Contrat vacataire (Éducation)</div></div>
+        <div class="kpi-card total"><div class="kpi-title">Total Encaissé</div><div class="kpi-amount" id="kpiTotal">0,00 DH</div><div class="kpi-sub" style="color: #adb5bd;">Impôt estimé (1%) : <span id="kpiTax">0,00 DH</span></div></div>
+      </div>
+
+      <div class="card-box">
+        <h2>Ajouter un Encaissement / Revenu</h2>
+        <form id="revenueForm">
+          <div class="form-group">
+            <label for="revSource">Source du revenu</label>
+            <select id="revSource" class="dash-control" required>
+              <option value="WEB">WEB (Services digitaux / Développement Web)</option>
+              <option value="MEMDEV">Contrat DI MEMDEV (Salaire mensuel)</option>
+              <option value="SMMCPAN">SMMCPAN (Achat et vente du produit digital)</option>
+              <option value="ECOLE">Contrat vacataire École les champs Élysées (Service d'éducation)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="revDate">Date d'encaissement</label>
+            <input type="date" id="revDate" class="dash-control" required />
+          </div>
+          <div class="form-group">
+            <label for="revDesc">Libellé / Détail</label>
+            <input type="text" id="revDesc" class="dash-control" placeholder="Ex : Salaire mois / Vente pack digital..." required />
+          </div>
+          <div class="form-group">
+            <label for="revAmount">Montant encaissé (en DH)</label>
+            <input type="number" id="revAmount" class="dash-control" placeholder="Ex : 4500" min="0" step="0.01" required />
+          </div>
+          <button type="submit" class="btn-submit-dec">+ Ajouter ce revenu</button>
+        </form>
+      </div>
+
+      <div class="card-box">
+        <h2>Journal des Revenus Enregistrés</h2>
+        <div class="table-responsive">
+          <table class="history-table">
+            <thead><tr><th>Date</th><th>Catégorie</th><th>Libellé</th><th>Montant</th><th>Action</th></tr></thead>
+            <tbody id="revenueTableBody">
+              <tr><td colspan="5" style="text-align: center; color: #6c757d;">Aucun revenu enregistré pour le moment.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="infoView" class="app-section">
+    <div class="dashboard-container">
+      <div class="welcome-card">
+        <div>
+          <h1>Informations du Demandeur & Dossier</h1>
+          <p>Données officielles extraites du certificat d'inscription de l'auto-entrepreneur[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)[span_6](start_span)[span_6](end_span)[span_7](start_span)[span_7](end_span)[span_8](start_span)[span_8](end_span)[span_9](start_span)[span_9](end_span)</p>
+        </div>
+        <span class="status-pill">Dossier Validé</span>
+      </div>
+
+      <div class="card-box">
+        <h2>Partie A - Renseignements sur le Demandeur</h2>
+        <h3 class="section-subtitle">A1 - Identité du demandeur[span_10](start_span)[span_10](end_span)</h3>
+        <div class="info-grid">
+          <div class="info-group"><label>Nom & Prénom</label><div class="info-value">ABALLAGH Saber[span_11](start_span)[span_11](end_span)[span_12](start_span)[span_12](end_span)</div></div>
+          <div class="info-group"><label>N° de CNIE</label><div class="info-value">IC101141[span_13](start_span)[span_13](end_span)</div></div>
+          <div class="info-group"><label>Sexe</label><div class="info-value">Homme[span_14](start_span)[span_14](end_span)</div></div>
+          <div class="info-group"><label>Nationalité</label><div class="info-value">Maroc[span_15](start_span)[span_15](end_span)</div></div>
+          <div class="info-group"><label>Date et lieu de naissance</label><div class="info-value">21-12-1995 à Azilal[span_16](start_span)[span_16](end_span)</div></div>
+          <div class="info-group"><label>Téléphone Mobile / Fixe</label><div class="info-value">0715-06-25-46[span_17](start_span)[span_17](end_span)</div></div>
+          <div class="info-group"><label>Courriel (E-mail)</label><div class="info-value">saberabalagh@gmail.com[span_18](start_span)[span_18](end_span)</div></div>
+        </div>
+
+        <h3 class="section-subtitle">A2 - Adresse de la résidence principale[span_19](start_span)[span_19](end_span)</h3>
+        <div class="info-grid">
+          <div class="info-group" style="grid-column: 1 / -1;"><label>Adresse complète</label><div class="info-value">DAR SAADA 1 IMM 79 ETAGE 2 NUM 2[span_20](start_span)[span_20](end_span)</div></div>
+          <div class="info-group"><label>Commune / Ville</label><div class="info-value">MARRAKECH GUELIZ[span_21](start_span)[span_21](end_span)</div></div>
+          <div class="info-group"><label>Province / Préfecture</label><div class="info-value">MARRAKECH[span_22](start_span)[span_22](end_span)</div></div>
+          <div class="info-group"><label>Région</label><div class="info-value">Marrakech-Safi[span_23](start_span)[span_23](end_span)</div></div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <h2>Partie B - Activité & Domicile Fiscal</h2>
+        <h3 class="section-subtitle">B1 - Activité exercée[span_24](start_span)[span_24](end_span)</h3>
+        <div class="info-grid">
+          <div class="info-group"><label>Secteur d'activité</label><div class="info-value">PRESTATION DE SERVICE[span_25](start_span)[span_25](end_span)</div></div>
+          <div class="info-group"><label>Branche d'activité</label><div class="info-value">SERVICE INFORMATIQUE & DIGITAL[span_26](start_span)[span_26](end_span)</div></div>
+          <div class="info-group" style="grid-column: 1 / -1;"><label>Activité</label><div class="info-value">MARKETING DIGITAL ET COMMUNICATION - DEVELOPPEMENT WEB[span_27](start_span)[span_27](end_span)</div></div>
+          <div class="info-group"><label>Périodicité & Lieu</label><div class="info-value">Permanente (Domicile)[span_28](start_span)[span_28](end_span)</div></div>
+        </div>
+
+        <h3 class="section-subtitle">B2 - Domicile fiscal & Références dossier[span_29](start_span)[span_29](end_span)[span_30](start_span)[span_30](end_span)[span_31](start_span)[span_31](end_span)</h3>
+        <div class="info-grid">
+          <div class="info-group" style="grid-column: 1 / -1;"><label>Adresse du lieu de travail</label><div class="info-value">RES EL WARDA IMM C NO 6 TABRIQUET SALE[span_32](start_span)[span_32](end_span)</div></div>
+          <div class="info-group"><label>N° du Dossier / Dépôt</label><div class="info-value">AE-260723-042047 (23/07/2026)[span_33](start_span)[span_33](end_span)[span_34](start_span)[span_34](end_span)</div></div>
+          <div class="info-group"><label>Agence Bancaire de Rattachement</label><div class="info-value">Attijariwafa Bank Saada Marrakech[span_35](start_span)[span_35](end_span)</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal" id="successModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Déclaration enregistrée !</h3>
+      <p id="modalText">Votre déclaration de chiffre d'affaires a bien été transmise.</p>
+      <button class="modal-btn" id="closeModal">Fermer</button>
+    </div>
+  </div>
+
+  <script>
+    // Enregistrement du Service Worker pour la PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker enregistré avec succès.'))
+        .catch(err => console.log('Erreur Service Worker:', err));
+    }
+
+    const VALID_CIN = "IC101141";
+    const VALID_PASS = "Marrakech123@";
+
+    const loginView = document.getElementById('loginView');
+    const declarationsView = document.getElementById('declarationsView');
+    const revenusView = document.getElementById('revenusView');
+    const infoView = document.getElementById('infoView');
+    const menuToggle = document.getElementById('menuToggle');
+    const navUserActions = document.getElementById('navUserActions');
+    const mobileDropdown = document.getElementById('mobileDropdown');
+
+    const navTabDeclarations = document.getElementById('navTabDeclarations');
+    const navTabRevenus = document.getElementById('navTabRevenus');
+    const navTabInfos = document.getElementById('navTabInfos');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    const mTabDeclarations = document.getElementById('mTabDeclarations');
+    const mTabRevenus = document.getElementById('mTabRevenus');
+    const mTabInfos = document.getElementById('mTabInfos');
+    const mLogoutBtn = document.getElementById('mLogoutBtn');
+
+    const canvas = document.getElementById('captchaCanvas');
+    const ctx = canvas.getContext('2d');
+    const refreshBtn = document.getElementById('refreshCaptcha');
+    const loginForm = document.getElementById('loginForm');
+    const alertBox = document.getElementById('alertBox');
+
+    const turnoverInput = document.getElementById('turnover');
+    const activitySelect = document.getElementById('activityType');
+    const displayCA = document.getElementById('displayCA');
+    const displayRate = document.getElementById('displayRate');
+    const displayTax = document.getElementById('displayTax');
+    const declarationForm = document.getElementById('declarationForm');
+    const historyBody = document.getElementById('historyBody');
+
+    const revenueForm = document.getElementById('revenueForm');
+    const revenueTableBody = document.getElementById('revenueTableBody');
+    const btnTransferToDecl = document.getElementById('btnTransferToDecl');
+
+    const successModal = document.getElementById('successModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const closeModal = document.getElementById('closeModal');
+
+    let expectedResult = 50;
+    let declarationsHistory = JSON.parse(localStorage.getItem('ae_declarations')) || [];
+    let revenuesList = JSON.parse(localStorage.getItem('ae_revenues')) || [];
+
+    document.getElementById('revDate').valueAsDate = new Date();
+
+    function generateCaptcha(initial = false) {
+      const num1 = initial ? 41 : Math.floor(Math.random() * 50) + 10;
+      const num2 = initial ? 9 : Math.floor(Math.random() * 9) + 1;
+      expectedResult = num1 + num2;
+
+      ctx.fillStyle = '#d3d7de';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const colors = ['#7c8594', '#a08496', '#6b8e9b', '#8d99ae', '#b5838d'];
+      for (let i = 0; i < 450; i++) {
+        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+      }
+      for (let i = 0; i < 6; i++) {
+        ctx.strokeStyle = 'rgba(90, 105, 130, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.stroke();
+      }
+      ctx.font = 'bold 20px "Courier New", monospace';
+      ctx.fillStyle = '#1d3557';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${num1} + ${num2} =`, canvas.width / 2, canvas.height / 2 + 2);
+    }
+
+    refreshBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      generateCaptcha(false);
+      document.getElementById('captchaInput').value = '';
+    });
+
+    menuToggle.addEventListener('click', () => { mobileDropdown.classList.toggle('show'); });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const cin = document.getElementById('cin').value.trim().toUpperCase();
+      const password = document.getElementById('password').value;
+      const userCaptcha = parseInt(document.getElementById('captchaInput').value.trim(), 10);
+
+      alertBox.style.display = 'block';
+      if (userCaptcha !== expectedResult) {
+        alertBox.className = 'alert-msg alert-error';
+        alertBox.textContent = "Le résultat de l'opération est incorrect.";
+        generateCaptcha(false);
+        document.getElementById('captchaInput').value = '';
+        return;
+      }
+      if (cin !== VALID_CIN || password !== VALID_PASS) {
+        alertBox.className = 'alert-msg alert-error';
+        alertBox.textContent = "Numéro de pièce d'identité ou mot de passe incorrect.";
+        generateCaptcha(false);
+        document.getElementById('captchaInput').value = '';
+        return;
+      }
+
+      alertBox.style.display = 'none';
+      loginView.style.display = 'none';
+      menuToggle.style.display = 'flex';
+      showDeclarations();
+      navUserActions.style.display = 'flex';
+    });
+
+    function resetTabs() {
+      declarationsView.style.display = 'none';
+      revenusView.style.display = 'none';
+      infoView.style.display = 'none';
+      navTabDeclarations.classList.remove('active');
+      navTabRevenus.classList.remove('active');
+      navTabInfos.classList.remove('active');
+      mTabDeclarations.classList.remove('active');
+      mTabRevenus.classList.remove('active');
+      mTabInfos.classList.remove('active');
+      mobileDropdown.classList.remove('show');
+    }
+
+    function showDeclarations() { resetTabs(); declarationsView.style.display = 'block'; navTabDeclarations.classList.add('active'); mTabDeclarations.classList.add('active'); }
+    function showRevenus() { resetTabs(); revenusView.style.display = 'block'; navTabRevenus.classList.add('active'); mTabRevenus.classList.add('active'); }
+    function showInfos() { resetTabs(); infoView.style.display = 'block'; navTabInfos.classList.add('active'); mTabInfos.classList.add('active'); }
+
+    navTabDeclarations.addEventListener('click', showDeclarations);
+    mTabDeclarations.addEventListener('click', showDeclarations);
+    navTabRevenus.addEventListener('click', showRevenus);
+    mTabRevenus.addEventListener('click', showRevenus);
+    navTabInfos.addEventListener('click', showInfos);
+    mTabInfos.addEventListener('click', showInfos);
+
+    const sourceLabels = {
+      'WEB': { name: 'WEB', badge: 'badge-web' },
+      'MEMDEV': { name: 'Contrat DI MEMDEV', badge: 'badge-memdev' },
+      'SMMCPAN': { name: 'SMMCPAN (Digital)', badge: 'badge-smmcpan' },
+      'ECOLE': { name: 'École Les Champs Élysées', badge: 'badge-ecole' }
+    };
+
+    revenueForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const source = document.getElementById('revSource').value;
+      const date = document.getElementById('revDate').value;
+      const desc = document.getElementById('revDesc').value.trim();
+      const amount = parseFloat(document.getElementById('revAmount').value) || 0;
+
+      if (amount <= 0) return;
+
+      revenuesList.unshift({ id: Date.now(), source, date, desc, amount });
+      localStorage.setItem('ae_revenues', JSON.stringify(revenuesList));
+      updateRevenuesUI();
+      revenueForm.reset();
+      document.getElementById('revDate').valueAsDate = new Date();
+    });
+
+    window.deleteRevenue = function(id) {
+      revenuesList = revenuesList.filter(item => item.id !== id);
+      localStorage.setItem('ae_revenues', JSON.stringify(revenuesList));
+      updateRevenuesUI();
+    };
+
+    function formatDH(val) {
+      return val.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DH';
+    }
+
+    function updateRevenuesUI() {
+      let totWeb = 0, totMemdev = 0, totSmmcpan = 0, totEcole = 0;
+      revenuesList.forEach(item => {
+        if (item.source === 'WEB') totWeb += item.amount;
+        if (item.source === 'MEMDEV') totMemdev += item.amount;
+        if (item.source === 'SMMCPAN') totSmmcpan += item.amount;
+        if (item.source === 'ECOLE') totEcole += item.amount;
+      });
+
+      const grandTotal = totWeb + totMemdev + totSmmcpan + totEcole;
+      const estimatedTax = grandTotal * 0.01;
+
+      document.getElementById('kpiWeb').textContent = formatDH(totWeb);
+      document.getElementById('kpiMemdev').textContent = formatDH(totMemdev);
+      document.getElementById('kpiSmmcpan').textContent = formatDH(totSmmcpan);
+      document.getElementById('kpiEcole').textContent = formatDH(totEcole);
+      document.getElementById('kpiTotal').textContent = formatDH(grandTotal);
+      document.getElementById('kpiTax').textContent = formatDH(estimatedTax);
+
+      if (revenuesList.length === 0) {
+        revenueTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #6c757d;">Aucun revenu enregistré pour le moment.</td></tr>';
+        return;
+      }
+
+      revenueTableBody.innerHTML = revenuesList.map(item => `
+        <tr>
+          <td>${item.date}</td>
+          <td><span class="badge-source ${sourceLabels[item.source].badge}">${sourceLabels[item.source].name}</span></td>
+          <td>${item.desc}</td>
+          <td><strong>${formatDH(item.amount)}</strong></td>
+          <td><button type="button" class="btn-delete-row" onclick="deleteRevenue(${item.id})">Supprimer</button></td>
+        </tr>
+      `).join('');
+    }
+
+    btnTransferToDecl.addEventListener('click', () => {
+      const total = revenuesList.reduce((acc, item) => acc + item.amount, 0);
+      showDeclarations();
+      turnoverInput.value = total.toFixed(2);
+      activitySelect.value = 'service';
+      calculateTax();
+    });
+
+    function calculateTax() {
+      const ca = parseFloat(turnoverInput.value) || 0;
+      const type = activitySelect.value;
+      const rate = type === 'commercial' ? 0.005 : 0.01;
+      const rateText = type === 'commercial' ? '0,5 %' : '1 %';
+      const tax = ca * rate;
+
+      displayCA.textContent = formatDH(ca);
+      displayRate.textContent = rateText;
+      displayTax.textContent = formatDH(tax);
+    }
+
+    turnoverInput.addEventListener('input', calculateTax);
+    activitySelect.addEventListener('change', calculateTax);
+
+    declarationForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const period = document.getElementById('period').value;
+      const type = activitySelect.value;
+      const typeLabel = type === 'commercial' ? 'Commerce / Artisanat (0,5%)' : 'Services (1%)';
+      const ca = parseFloat(turnoverInput.value) || 0;
+      const rate = type === 'commercial' ? 0.005 : 0.01;
+      const tax = ca * rate;
+
+      declarationsHistory.unshift({ period, typeLabel, ca: formatDH(ca), tax: formatDH(tax) });
+      localStorage.setItem('ae_declarations', JSON.stringify(declarationsHistory));
+      renderHistory();
+
+      modalTitle.textContent = "Déclaration enregistrée !";
+      modalText.innerHTML = `Votre déclaration pour la période <strong>${period}</strong> (CA : <strong>${formatDH(ca)}</strong>) a été enregistrée avec succès.<br>Impôt dû : <strong>${formatDH(tax)}</strong>.`;
+      successModal.style.display = 'flex';
+    });
+
+    function renderHistory() {
+      if (declarationsHistory.length === 0) {
+        historyBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #6c757d;">Aucune déclaration enregistrée pour cette session.</td></tr>';
+        return;
+      }
+      historyBody.innerHTML = declarationsHistory.map(item => `
+        <tr>
+          <td><strong>${item.period}</strong></td>
+          <td>${item.typeLabel}</td>
+          <td>${item.ca}</td>
+          <td><strong>${item.tax}</strong></td>
+          <td><span style="color: #198754; font-weight: 600;">Validée</span></td>
+        </tr>
+      `).join('');
+    }
+
+    closeModal.addEventListener('click', () => { successModal.style.display = 'none'; declarationForm.reset(); calculateTax(); });
+
+    function handleLogout() {
+      resetTabs();
+      navUserActions.style.display = 'none';
+      loginView.style.display = 'flex';
+      menuToggle.style.display = 'none';
+      loginForm.reset();
+      generateCaptcha(true);
+    }
+
+    logoutBtn.addEventListener('click', handleLogout);
+    mLogoutBtn.addEventListener('click', handleLogout);
+
+    generateCaptcha(true);
+    calculateTax();
+    updateRevenuesUI();
+    renderHistory();
+  </script>
+</body>
+</html>
